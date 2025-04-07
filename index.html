@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Odd Color Out</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="stylesheet.css">
+</head>
+
+<body class="shape-circle">
+    <header>
+        <h1>Odd Color Out</h1>
+    </header>
+
+    <main class="container">
+        <section class="game-info">
+            <div class="stats">
+                <div class="stat-item progress-item">
+                    <span class="stat-label">Time</span>
+                    <div style="display: flex; width: 100%; align-items: center; gap: 10px;">
+                        <div class="progress-container" style="flex-grow: 1;">
+                            <div id="progress-bar" class="progress-bar"></div>
+                        </div>
+                        <span class="stat-value" id="time-display" style="margin: 0; min-width: 32px; text-align: right;">0s</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Score</span>
+                    <span class="stat-value" id="score-display">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Best</span>
+                    <span class="stat-value" id="high-score-display">0</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="game-grid-container">
+        <section id="game-grid" class="grid-size-2"></section>
+        </div>
+
+        <section class="controls">
+            <button id="easy-btn" aria-label="Start easy game"><span>Easy</span></button>
+            <button id="medium-btn" aria-label="Start medium game"><span>Medium</span></button>
+            <button id="hard-btn" aria-label="Start hard game"><span>Hard</span></button>
+            <button id="skull-btn" aria-label="Start skull game"><span>💀</span></button>
+        </section>
+    </main>
+    <div class="utilities">
+        <button id="settings-button" aria-label="Game settings">⚙️</button>
+    </div>
+    <div class="settings-overlay" id="settings-overlay">
+        <div class="settings-panel">
+            <h3>Settings</h3>
+            <div class="settings-options">
+                <div class="setting-item">
+                    <span>Theme</span>
+        <button id="theme-toggle" aria-label="Toggle theme">🌓</button>
+                </div>
+                <div class="setting-item">
+                    <span>Tile Shape</span>
+        <button id="shape-toggle" aria-label="Toggle tile shape">⬜</button>
+                </div>
+            </div>
+            <button id="close-settings" aria-label="Close settings">Close</button>
+        </div>
+    </div>
+    <div class="message-overlay" id="message-overlay">
+        <div class="message-content" id="message-content">
+            <button class="close-button" onclick="closeMessage()" aria-label="Close message">×</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

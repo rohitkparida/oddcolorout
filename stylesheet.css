@@ -1,0 +1,1211 @@
+:root {
+    /* Spacing system */
+    --space-unit: 4px;
+    --space-xs: calc(var(--space-unit) * 1); /* 4px */
+    --space-sm: calc(var(--space-unit) * 2); /* 8px */
+    --space-md: calc(var(--space-unit) * 4); /* 16px */
+    --space-lg: calc(var(--space-unit) * 6); /* 24px */
+    --space-xl: calc(var(--space-unit) * 10); /* 40px */
+    
+    /* Typography */
+    --font-base: clamp(12px, 3vw + 4px, 20px);
+    --font-sm: clamp(14px, 2vw + 4px, 18px);
+    --font-md: clamp(16px, 3vw + 4px, 24px);
+    --font-lg: clamp(28px, 5vw, 38px);
+    --line-height: 1.5;
+    --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-family-display: "Lilita One", sans-serif;
+    
+    /* Borders & Radiuses */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-round: 50%;
+    --border-width: 1px;
+    --border-width-thick: 3px;
+    
+    /* Grid system */
+    --grid-gap-sm: 12px;
+    --grid-gap-md: 18px;
+    --grid-gap-lg: 24px;
+    
+    /* Color system - Light theme */
+    --color-bg: #f8f8f8;
+    --color-container: #fafafa;
+    --color-surface: #f5f5f5;
+    --color-border: #e0e0e0;
+    
+    --color-text-primary: #333;
+    --color-text-secondary: #666;
+    --color-text-tertiary: #999;
+    
+    --color-primary: #3498db;
+    --color-primary-dark: #2980b9;
+    --color-success: #2ecc71;
+    --color-error: #e74c3c;
+    
+    /* Component-specific */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.2), 0 12px 24px rgba(0, 0, 0, 0.1);
+    
+    /* Button theme */
+    --btn-gradient-default: linear-gradient(180deg, #AADD02 0%, #60AB00 18%, #60AB00 82%, #217000 100%);
+    --btn-border-color: #2E1C22;
+    --btn-text-color: #fff;
+    --btn-shadow-color: rgba(0, 0, 0, 0.2);
+    --btn-highlight-color: #AADD02;
+    --btn-shadow-dark-color: #217000;
+    
+    /* Animations & Transitions */
+    --transition-fast: 0.2s;
+    --transition-normal: 0.3s;
+    --transition-slow: 0.5s;
+    
+    /* Tile sizes - Fix math and add safeguards */
+    --tile-size-base: min(min(22vh, 22vw), 95px);
+    --tile-size-2: var(--tile-size-base);
+    --tile-size-3: calc(var(--tile-size-base) * 0.85);
+    --tile-size-4: calc(var(--tile-size-base) * 0.7);
+    --tile-size-5: calc(var(--tile-size-base) * 0.6);
+    
+    /* Maintain backward compatibility */
+    --base: var(--space-unit);
+    --font: var(--font-base);
+    --pad: var(--space-sm);
+    --pad-lg: var(--space-lg);
+    --margin: calc(var(--space-sm) + 2px);  /* Fix calculation: 10px */
+    --margin-lg: var(--space-xl);
+    --radius: var(--radius-md);
+    --grid-gap-small: var(--grid-gap-md);
+    --grid-gap-medium: 20px;
+    --grid-gap-large: var(--grid-gap-lg);
+    
+    --bg: var(--color-bg);
+    --container: var(--color-container);
+    --surface: var(--color-surface);
+    --border: var(--color-border);
+    
+    --text: var(--color-text-primary);
+    --text-2: var(--color-text-secondary);
+    --text-3: var(--color-text-tertiary);
+    
+    --primary: var(--color-primary);
+    --primary-dark: var(--color-primary-dark);
+    --correct: var(--color-success);
+    --wrong: var(--color-error);
+    
+    --btn: var(--btn-gradient-default);
+    --btn-border: var(--btn-border-color);
+    --btn-text: var(--btn-text-color);
+    --btn-shadow: var(--btn-shadow-color);
+    --btn-highlight: var(--btn-highlight-color);
+    --btn-shadow-dark: var(--btn-shadow-dark-color);
+}
+
+.dark-mode {
+    --color-bg: #222;
+    --color-container: #2d2d2d;
+    --color-surface: #1e1e1e;
+    --color-border: #404040;
+    
+    --color-text-primary: #f0f0f0;
+    --color-text-secondary: #ccc;
+    --color-text-tertiary: #aaa;
+    
+    --btn-gradient-default: #388E3C;
+    --btn-shadow-dark-color: #2E7D32;
+    
+    /* Keep backward compatibility */
+    --bg: var(--color-bg);
+    --container: var(--color-container);
+    --surface: var(--color-surface);
+    --border: var(--color-border);
+    
+    --text: var(--color-text-primary);
+    --text-2: var(--color-text-secondary);
+    --text-3: var(--color-text-tertiary);
+    
+    --btn: var(--btn-gradient-default);
+    --btn-shadow-dark: var(--btn-shadow-dark-color);
+}
+
+* {
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-family-base);
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    height: 100vh;
+    font-size: var(--font-base);
+    transition: color var(--transition-normal), background-color var(--transition-normal);
+    overflow: hidden; /* Prevent scrolling */
+}
+
+header {
+    padding: 10px 0;
+    z-index: 5;
+    position: relative;
+    min-height: 50px;
+    height: min-content;
+    flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+h1 {
+    font-family: var(--font-family-display);
+    font-size: var(--font-lg);
+    margin: 5px 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+.container {
+    background: var(--color-container);
+    padding: clamp(10px, 3vh, 20px); /* Responsive padding based on viewport height */
+    border-radius: calc(var(--space-unit) * 8);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(8px, 2vh, 16px); /* Responsive gap based on viewport height */
+    transition: var(--transition-normal);
+    flex: 1; /* Allow container to fill available space */
+    width: 100%;
+    max-width: min(95vw, 600px);
+    max-height: calc(100vh - 80px); /* Leave room for header */
+    box-sizing: border-box;
+    justify-content: space-between; /* Distribute space between sections */
+    overflow: visible; /* Don't clip content but don't scroll */
+}
+
+.game-info {
+    width: 100%;
+    flex-shrink: 0; /* Don't shrink stats */
+}
+
+.game-grid-container {
+    flex: 1; /* Let grid container grow and shrink */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: min(95vw, 500px);
+    min-height: 0; /* Allow shrinking below content size */
+    height: auto;
+    position: relative;
+}
+
+#game-grid {
+    display: grid;
+    gap: min(10px, 2vmin); /* Smaller gaps to allow for larger tiles */
+    transition: var(--transition-normal);
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    max-width: min(95vw, 500px);
+    max-height: 100%;
+    aspect-ratio: 1; /* Keep grid square */
+    box-sizing: border-box;
+}
+
+.tile {
+    position: relative;
+    cursor: pointer;
+    width: var(--tile-size);
+    aspect-ratio: 1/1; /* Ensure square tiles regardless of size */
+    max-width: 100%;
+    border: 2px solid transparent;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.tile:hover {
+    transform: scale(1.05);
+}
+
+.tile.correct {
+    animation: correct 0.6s;
+}
+
+.tile.wrong {
+    animation: wrong 0.5s;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(var(--space-unit) * 3);
+    width: 100%;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--color-container);
+    padding: 14px 20px;
+    border-radius: var(--radius-md);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.stat-item.progress-item {
+    grid-column: 1 / -1;
+}
+
+.stat-label {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+}
+
+.stat-value {
+    font-size: var(--font-md);
+    font-weight: bold;
+    color: var(--color-primary);
+    margin-top: var(--space-xs);
+}
+
+.progress-container {
+    width: 100%;
+    height: 14px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 7px;
+    overflow: hidden;
+    margin-top: 8px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: 7px;
+    transition: width 0.2s linear;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset;
+}
+
+.progress-bar.low {
+    background: var(--color-error);
+}
+
+.controls {
+    display: flex;
+    gap: calc(var(--space-unit) * 3);
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 0;
+    padding: 8px 0;
+    flex-shrink: 0; /* Don't shrink controls */
+}
+
+button {
+    padding: clamp(4px, 1vw + 1px, 8px) clamp(8px, 2vw + 2px, 12px);
+    border: 3px solid var(--btn-border);
+    border-radius: var(--radius);
+    background: var(--btn);
+    color: var(--btn-text);
+    cursor: pointer;
+    font-family: "Lilita One", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    font-size: clamp(12px, 1.5vw + 2px, 16px);
+    box-shadow: 0 4px 0 var(--btn-shadow), 
+               inset 0 4px 0 var(--btn-highlight), 
+               inset 0 -4px 0 var(--btn-shadow-dark);
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+    transition: transform 0.05s ease-in, box-shadow 0.05s ease-in;
+    touch-action: manipulation;
+    min-height: unset;
+    line-height: 1.2;
+}    
+
+button:hover {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--btn-shadow), 
+               inset 0 4px 0 var(--btn-highlight), 
+               inset 0 -4px 0 var(--btn-shadow-dark);
+}
+
+button:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--btn-shadow), 
+               inset 0 4px 0 var(--btn-highlight), 
+               inset 0 -4px 0 var(--btn-shadow-dark);
+}
+
+/* Difficulty button variations */
+.difficulty-btn {
+    --btn-highlight: inherit;
+    --btn-shadow-dark: inherit;
+}
+
+#easy-btn {
+    --btn: linear-gradient(180deg, #AADD02 0%, #60AB00 18%, #60AB00 82%, #217000 100%);
+    --btn-highlight: #AADD02;
+    --btn-shadow-dark: #217000;
+}
+
+#medium-btn {
+    --btn: linear-gradient(180deg, #FCC801 0%, #F79700 18%, #F79700 82%, #D06201 100%);
+    --btn-highlight: #FCC801;
+    --btn-shadow-dark: #D06201;
+}
+
+#hard-btn {
+    --btn: linear-gradient(180deg, #F66912 0%, #E42919 18%, #E42919 82%, #A4090F 100%);
+    --btn-highlight: #F66912;
+    --btn-shadow-dark: #A4090F;
+}
+
+#skull-btn {
+    --btn: linear-gradient(180deg, #BA68C8 0%, #8E24A3 18%, #8E24A3 82%, #6A1B9A 100%);
+    --btn-highlight: #BA68C8;
+    --btn-shadow-dark: #6A1B9A;
+}
+
+/* Circular button style */
+.btn-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+@keyframes correct {
+    50% { transform: scale(1.1); }
+}
+
+@keyframes wrong {
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+/* Overlay base */
+.overlay, .message-overlay, .settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+    z-index: 30;
+    padding: 20px;
+}
+
+.overlay.active, .message-overlay.active, .settings-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Message styles */
+.message-overlay {
+    backdrop-filter: blur(3px);
+}
+
+.settings-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.message-content, .settings-panel {
+    background: var(--color-container);
+    border-radius: calc(var(--space-unit) * 6);
+    padding: clamp(12px, 4vw + 4px, 32px);
+    border: var(--border-width) solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    max-width: 100%;
+    width: auto;
+    color: var(--color-text-primary);
+    transition: var(--transition-normal);
+    position: relative;
+}
+
+.message-content {
+    text-align: center;
+    max-height: 80vh;
+    overflow-y: auto;
+    font-size: clamp(14px, 2vw + 4px, 18px);
+}
+
+.settings-panel {
+    width: 85%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: 0;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    color: var(--color-text-primary);
+    transition: 0.2s;
+    min-width: unset;
+    min-height: unset;
+}
+
+.close-button:hover {
+    transform: scale(1.1);
+}
+
+.utilities {
+    display: flex;
+    gap: 16px;
+    padding: 8px;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+}
+
+#settings-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 26px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.settings-panel h3 {
+    font-size: 24px;
+    text-align: center;
+    margin: 0 0 10px;
+    font-weight: bold;
+}
+
+.settings-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.setting-item span {
+    font-size: 18px;
+}
+
+#close-settings {
+    margin-top: 16px;
+    padding: 14px;
+    font-size: 18px;
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .message-content {
+        max-height: 70vh;
+    }
+
+    button {
+        padding: 8px 16px;
+        font-size: clamp(12px, 2vw + 4px, 16px);
+    }
+
+    .controls-section {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-item {
+        padding: 10px 16px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+    }
+    
+    .stat-value {
+        font-size: 18px;
+    }
+}
+
+.info-section {
+    padding: calc(var(--space-unit) * 6);
+    border: 1px solid var(--color-border);
+    border-radius: calc(var(--space-unit) * 4);
+    flex-direction: column;
+    gap: calc(var(--space-unit) * 4);
+}
+
+.difficulty-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: start;
+    margin: auto;
+}
+
+/* Base styles for mobile-first approach */
+@media (max-width: 768px) {
+    :root {
+        --space-unit: 6px;
+        --font-base: clamp(16px, 4vw + 4px, 24px);
+        --tile-size-base: min(min(20vh, 20vw), 85px);
+    }
+    
+    body {
+        padding: 0;
+    }
+    
+    .container {
+        padding: 12px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        max-height: calc(100vh - 60px); /* Account for smaller header */
+    }
+    
+    h1 {
+        font-size: clamp(32px, 6vw, 48px);
+        margin: 16px 0;
+    }
+    
+    .stats {
+        gap: 12px;
+        padding: 10px 5px;
+    }
+    
+    .stat-item {
+        padding: 10px 16px;
+    }
+    
+    .stat-label {
+        font-size: clamp(14px, 3vw + 2px, 22px);
+    }
+    
+    .stat-value {
+        font-size: clamp(18px, 4vw + 4px, 32px);
+    }
+    
+    .progress-container {
+        height: 20px;
+        border-radius: 10px;
+    }
+    
+    button {
+        padding: clamp(8px, 3vw + 4px, 18px) clamp(16px, 5vw + 4px, 24px);
+        font-size: clamp(12px, 3vw + 4px, 24px);
+    }
+    
+    .controls {
+        gap: 12px;
+        margin: 20px 0;
+    }
+    
+    .game-grid-container {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+    }
+    
+    #game-grid {
+        gap: 10px;
+        max-width: min(90vw, 450px);
+        max-height: 100%;
+    }
+    
+    .message-content {
+        padding: clamp(24px, 6vw + 8px, 40px);
+        font-size: clamp(18px, 3vw + 4px, 24px);
+        max-height: 70vh;
+        width: 90%;
+    }
+    
+    .utilities {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+    }
+    
+    .utilities button {
+        width: 44px;
+        height: 44px;
+        font-size: 22px;
+    }
+    
+    #settings-button {
+        font-size: 20px; /* Smaller font size for mobile */
+    }
+}
+
+/* Desktop overrides */
+@media (min-width: 769px) {
+    .container {
+        margin: clamp(var(--margin), 5vw + 4px, var(--margin-lg)) auto;
+        max-width: 480px;
+        max-height: 900px;
+    }
+    
+    .game-grid-container {
+        padding: 10px 0;
+    }
+    
+    #game-grid {
+        max-width: min(90vw, 450px);
+    }
+}
+
+/* Tablet-specific media query - improved for better device coverage */
+@media (min-width: 768px) and (max-width: 1366px), 
+       (min-height: 768px) and (max-height: 1366px) {
+    body {
+        overflow-y: auto; /* Allow minimal scrolling if needed on tablets */
+    }
+    
+    .container {
+        max-height: 90vh;
+        max-width: 95vw;
+        margin: 10px auto;
+        padding: 15px;
+    }
+    
+    :root {
+        --tile-size-base: min(min(16vh, 16vw), 90px);
+    }
+    
+    .game-grid-container {
+        max-height: 60vh;
+    }
+    
+    #game-grid {
+        max-width: 90vw;
+        max-height: 90%;
+    }
+    
+    /* Ensure buttons don't get too big on tablets */
+    .controls button {
+        padding: 10px 16px;
+        font-size: clamp(14px, 2vw, 18px);
+    }
+    
+    /* Adjust stats for tablets */
+    .stat-item {
+        padding: 10px 15px;
+    }
+    
+    .stat-label {
+        font-size: 16px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+}
+
+/* iPad Pro support (12.9") */
+@media only screen 
+and (min-device-width: 1024px) 
+and (max-device-width: 1366px) 
+and (-webkit-min-device-pixel-ratio: 2) {
+    .container {
+        max-height: 85vh;
+        margin: 15px auto;
+    }
+    
+    :root {
+        --tile-size-base: min(min(18vh, 18vw), 95px);
+    }
+}
+
+/* Folding phones / dual screen devices */
+@media (min-width: 320px) and (max-width: 767px) and (min-height: 640px) and (max-height: 900px) {
+    :root {
+        --tile-size-base: min(min(17vh, 25vw), 80px);
+    }
+    
+    .container {
+        max-height: 84vh;
+    }
+}
+
+/* Ultra-wide screen support */
+@media (min-width: 1800px) or (min-aspect-ratio: 2/1) {
+    body {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+    
+    .container {
+        max-width: 550px;
+    }
+    
+    :root {
+        --tile-size-base: min(min(20vh, 10vw), 95px);
+    }
+}
+
+/* Fix for screen readers and accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001s !important;
+        transition-duration: 0.001s !important;
+    }
+    
+    .tile:hover {
+        transform: none;
+    }
+}
+
+/* Fix for iOS Safari 100vh issue */
+@supports (-webkit-touch-callout: none) {
+    body {
+        height: -webkit-fill-available;
+        min-height: -webkit-fill-available;
+    }
+    
+    .container {
+        max-height: calc(100vh - 80px - env(safe-area-inset-bottom, 0px));
+    }
+}
+
+/* Ensure consistent behavior with CSS Grid for older browsers */
+@supports not (aspect-ratio: 1) {
+    #game-grid {
+        position: relative;
+    }
+    
+    #game-grid::before {
+        content: "";
+        display: block;
+        padding-top: 100%;
+    }
+    
+    #game-grid > * {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* Fix for potential resize issues */
+html, body {
+    overscroll-behavior: none;
+    touch-action: manipulation;
+}
+
+/* Grid size utilities - adjust to prevent overlapping */
+.grid-size-2 {
+    --tile-size: var(--tile-size-2);
+    grid-template-columns: repeat(2, var(--tile-size));
+    grid-template-rows: repeat(2, var(--tile-size));
+    gap: min(10px, 3vmin);
+}
+
+.grid-size-3 {
+    --tile-size: var(--tile-size-3);
+    grid-template-columns: repeat(3, var(--tile-size));
+    grid-template-rows: repeat(3, var(--tile-size));
+    gap: min(8px, 2.5vmin);
+}
+
+.grid-size-4 {
+    --tile-size: var(--tile-size-4);
+    grid-template-columns: repeat(4, var(--tile-size));
+    grid-template-rows: repeat(4, var(--tile-size));
+    gap: min(6px, 2vmin);
+}
+
+.grid-size-5 {
+    --tile-size: var(--tile-size-5);
+    grid-template-columns: repeat(5, var(--tile-size));
+    grid-template-rows: repeat(5, var(--tile-size));
+    gap: min(4px, 1.5vmin);
+}
+
+/* Tile shapes */
+.shape-circle .tile {
+    border-radius: 50% !important;
+}
+
+.shape-square .tile {
+    border-radius: var(--radius) !important;
+}
+
+/* Responsive adjustments for different screen heights */
+@media (max-height: 600px) {
+    :root {
+        --tile-size-base: min(min(19vh, 19vw), 80px);
+    }
+    
+    h1 {
+        font-size: clamp(20px, 4vw, 28px);
+        margin: 2px 0;
+    }
+    
+    .container {
+        padding: 8px;
+        gap: 8px;
+        max-height: calc(100vh - 50px);
+    }
+    
+    .stat-item {
+        padding: 8px 12px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+    }
+    
+    .stat-value {
+        font-size: 16px;
+    }
+    
+    .controls button {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+}
+
+/* Adjust for very small devices in landscape */
+@media (max-height: 450px) and (orientation: landscape) {
+    :root {
+        --tile-size-base: min(min(18vh, 18vw), 75px);
+    }
+    
+    body {
+        flex-direction: row;
+        align-items: stretch;
+    }
+    
+    header {
+        width: 150px;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    h1 {
+        writing-mode: vertical-lr;
+        transform: rotate(180deg);
+        margin: 0;
+    }
+    
+    .container {
+        max-height: 100vh;
+        max-width: calc(100vw - 150px);
+    }
+    
+    .utilities {
+        top: auto;
+        bottom: 10px;
+    }
+}
+
+/* Specific fix for iPhone SE and similar small screens */
+@media screen and (max-width: 375px), 
+       screen and (max-height: 667px) and (max-width: 400px) {
+    :root {
+        --tile-size-base: min(13vw, 50px);
+    }
+    
+    /* Force tiles to maintain aspect ratio by setting only width */
+    .tile {
+        width: var(--tile-size);
+        height: auto;
+        aspect-ratio: 1/1;
+    }
+    
+    /* Adjust layout for smaller screen */
+    .game-grid-container {
+        width: 95%;
+        max-width: 340px;
+        padding: 0;
+    }
+    
+    #game-grid {
+        width: 100%;
+        max-width: 320px;
+    }
+    
+    /* Explicit grid sizing for each difficulty */
+    .grid-size-2 {
+        gap: 10px;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+    }
+    
+    .grid-size-3 {
+        gap: 8px;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+    }
+    
+    .grid-size-4 {
+        gap: 6px;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+    }
+    
+    .grid-size-5 {
+        gap: 4px;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(5, 1fr);
+    }
+    
+    /* Ensure proper spacing */
+    .controls {
+        gap: 8px;
+        margin-top: 10px;
+    }
+    
+    .controls button {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    /* Reduce container padding */
+    .container {
+        padding: 8px;
+        gap: 8px;
+    }
+    
+    /* Smaller stats */
+    .stat-item {
+        padding: 8px 10px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+    }
+    
+    .stat-value {
+        font-size: 16px;
+    }
+    
+    /* Make skull button match others in size */
+    #skull-btn {
+        min-width: 40px;
+    }
+}
+
+/* iPhone SE specific fix for 5x5 grid overlap */
+@media screen and (width: 375px) and (height: 667px),
+       screen and (max-width: 375px) and (max-height: 667px) {
+    :root {
+        --tile-size-base: 54px;
+    }
+    
+    .grid-size-5 {
+        --tile-size: 38px;
+        gap: 3px;
+    }
+    
+    /* Improve vertical spacing */
+    body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    header {
+        padding: 5px 0;
+        min-height: 30px;
+    }
+    
+    h1 {
+        font-size: 22px;
+        margin: 2px 0;
+    }
+    
+    .container {
+        max-height: calc(100vh - 40px);
+        padding: 6px;
+        gap: 6px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    /* Compact stats area */
+    .game-info {
+        margin-bottom: 2px;
+    }
+    
+    .stats {
+        gap: 6px;
+    }
+    
+    .stat-item {
+        padding: 6px 8px;
+    }
+    
+    .stat-label {
+        font-size: 12px;
+        margin-bottom: 2px;
+    }
+    
+    .stat-value {
+        font-size: 14px;
+        margin-top: 2px;
+    }
+    
+    .progress-container {
+        height: 12px;
+        margin-top: 4px;
+    }
+    
+    /* Game grid adjustments */
+    .game-grid-container {
+        width: 92%;
+        max-width: 300px;
+        padding: 0;
+        margin: 0 auto;
+        flex: 0.6; /* Reduce vertical space allocation further */
+        margin-bottom: 10px; /* Add space between grid and buttons */
+    }
+    
+    #game-grid {
+        max-width: 260px;
+        width: 100%;
+    }
+    
+    /* Controls adjustments */
+    .controls {
+        gap: 6px;
+        margin: 0;
+        padding: 5px 0;
+        position: relative;
+        z-index: 5; /* Ensure buttons are above grid */
+    }
+    
+    .controls button {
+        padding: 4px 8px;
+        font-size: 11px;
+        min-height: 24px;
+        margin-top: 5px;
+    }
+    
+    #skull-btn {
+        min-width: 30px;
+        margin-top: 3px;
+    }
+}
+
+/* Additional fix for 5x5 grid on small screens */
+@media screen and (max-width: 375px) and (max-height: 667px) {
+    .grid-size-5 {
+        --tile-size: 36px;
+        gap: 2px;
+    }
+    
+    #game-grid.grid-size-5 {
+        margin-bottom: 10px;
+    }
+    
+    /* Increase spacing between grid and controls specifically for 5x5 */
+    body.playing-skull .game-grid-container {
+        margin-bottom: 15px;
+    }
+}
+
+/* Fix for browsers that don't support aspect-ratio */
+@supports not (aspect-ratio: 1/1) {
+    .tile {
+        height: var(--tile-size); /* Fallback for browsers without aspect-ratio support */
+    }
+}
+
+/* Small screen button adjustments */
+@media (max-width: 420px) {
+    button {
+        /* Simpler, more consistent button sizing */
+        padding: 6px 12px;
+        font-size: 14px;
+        border-width: 2px;
+        box-shadow: 0 3px 0 var(--btn-shadow), 
+                   inset 0 3px 0 var(--btn-highlight), 
+                   inset 0 -3px 0 var(--btn-shadow-dark);
+    }
+    
+    .controls {
+        gap: 8px;
+        margin-top: 10px;
+    }
+    
+    /* Adjust skull button for small screens */
+    #skull-btn {
+        padding: 6px 12px;
+        min-width: 40px;
+    }
+}
+
+/* Very small screens (iPhone SE and smaller) */
+@media (max-width: 375px) {
+    button {
+        padding: 6px 10px;
+        font-size: 13px;
+        border-width: 2px;
+        box-shadow: 0 3px 0 var(--btn-shadow), 
+                   inset 0 3px 0 var(--btn-highlight), 
+                   inset 0 -3px 0 var(--btn-shadow-dark);
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Ensure better touch target size */
+    .controls button {
+        min-height: 36px;
+        min-width: 56px;
+    }
+    
+    /* Compact controls on very small screens */
+    .controls {
+        gap: 8px;
+        padding: 5px 0;
+        margin-top: 12px;
+    }
+}
+
+/* Specific iPhone SE fix */
+@media screen and (width: 375px) and (height: 667px) {
+    .controls {
+        margin-top: 15px;
+    }
+    
+    .grid-size-5 + .controls {
+        margin-top: 18px;
+    }
+}
+
+/* Responsive adjustments across screen sizes for buttons */
+@media screen and (min-width: 376px) and (max-width: 768px) {
+    button {
+        /* Medium size buttons for tablets */
+        padding: 8px 14px;
+        font-size: 15px;
+    }
+}
