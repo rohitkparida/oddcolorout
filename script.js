@@ -6,7 +6,7 @@ const gameState = {
         easy: 8,
         medium: 6,
         hard: 4,
-        skull: 3
+        death: 3
     },
     timeLeft: 0,
     score: 0,
@@ -15,22 +15,32 @@ const gameState = {
         easy: 0,
         medium: 0,
         hard: 0,
-        skull: 0
+        death: 0
     },
+    bestAverageTimes: {
+        easy: null,
+        medium: null,
+        hard: null,
+        death: null
+    },
+    previousBestScore: 0,
+    previousBestTime: null,
     clickedTiles: new Set(),
     needsUpdate: false,
-    newHighScore: false,
     processingClick: false,
-    animationFrameId: null
+    animationFrameId: null,
+    levelStartTime: 0,
+    totalReactionTime: 0,
+    correctClicks: 0
 };
 
 // Simple storage functions
 const store = {
-    get: (key, defaultValue) => localStorage.getItem(`shademaster-${key}`) || defaultValue,
-    set: (key, value) => localStorage.setItem(`shademaster-${key}`, value),
+    get: (key, defaultValue) => localStorage.getItem(`oddcolorout-${key}`) || defaultValue,
+    set: (key, value) => localStorage.setItem(`oddcolorout-${key}`, value),
     session: {
-        get: (key, defaultValue) => sessionStorage.getItem(`shademaster-${key}`) || defaultValue,
-        set: (key, value) => sessionStorage.setItem(`shademaster-${key}`, value)
+        get: (key, defaultValue) => sessionStorage.getItem(`oddcolorout-${key}`) || defaultValue,
+        set: (key, value) => sessionStorage.setItem(`oddcolorout-${key}`, value)
     }
 };
 
@@ -50,7 +60,7 @@ const difficultySettings = {
         sat: { init: 50, dec: 1.5, min: 20 },
         light: { range: 6, base: 50 }
     },
-    skull: {
+    death: {
         gridSize: 5,
         sat: { init: 40, dec: 2.0, min: 15 },
         light: { range: 4, base: 50 }
@@ -103,11 +113,37 @@ const generateTiles = gridSize => {
         createTile(i === diffIndex ? colors.different : colors.base, i === diffIndex));
 };
 
+// Helper to manage post-game hint
+const showPostGameHint = (show = true, message = "Hint text") => {
+    const hintEl = $('post-game-hint');
+    if (!hintEl) return;
+
+    if (show) {
+        hintEl.textContent = message;
+        hintEl.style.display = 'block'; // Use block, not flex
+         // Timeout for transition
+        setTimeout(() => hintEl.classList.add('visible'), 10);
+    } else {
+        hintEl.classList.remove('visible');
+         // Set display none after transition
+        setTimeout(() => hintEl.style.display = 'none', 300); 
+    }
+};
+
+// Modify closeMessage
 const closeMessage = (isGameOver = false) => {
     $('message-overlay').classList.remove('active');
-    if (!gameState.isPlaying) {
+    // Remove the premature hide call
+    // showPostGameHint(false); 
+    
+    if (isGameOver && !gameState.isPlaying) { // Check isGameOver flag
         const correctTile = document.querySelector('[data-different="true"]');
-        correctTile.style.borderBottom = `3px solid var(--text)`;
+        if (correctTile) { 
+            correctTile.style.borderBottom = `6px solid var(--color-text-primary)`;
+            // Show hint *after* border is applied
+            showPostGameHint(true, "Highlighted tile was the correct one. Select difficulty to play again!");
+        } 
+        // No need for an else here, startGame handles hiding
     }
 };
 
@@ -119,49 +155,111 @@ const showMessage = (message, duration = 2000) => {
     if (duration > 0) setTimeout(() => closeMessage(), duration);
 };
 
+// Helper for random titles based on performance
+const getGameOverTitle = (didBeatScore, didBeatTime) => {
+    const scoreTitles = ["Score Smasher!", "Point Powerhouse!", "Top Scorer!", "Impressive Score!"];
+    const timeTitles = ["Lightning Fast!", "Nice Flicks!", "Speed Demon!", "God Speed!"];
+    const bothTitles = ["Unstoppable!", "All-Rounder!", "Dual Record!", "Truly Skilled!"];
+    const noneTitles = ["Game Over", "Try Again?", "Get Good?", "Keep Practicing!", "You Suck!", "You're a Loser!", "Are you even trying?"];
+    const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    if (didBeatScore && didBeatTime) return getRandom(bothTitles);
+    if (didBeatScore) return getRandom(scoreTitles);
+    if (didBeatTime) return getRandom(timeTitles);
+    return getRandom(noneTitles);
+};
+
+// Helper to format result lines
+const formatResultLine = (label, currentValue, previousBest, isTime = false) => {
+    const currentFormatted = isTime ? `${currentValue.toFixed(3)}s` : currentValue;
+    const previousFormatted = isTime ? (previousBest !== null ? `${previousBest.toFixed(3)}s` : 'N/A') : previousBest;
+    const beatPrevious = isTime ? (previousBest !== null && currentValue < previousBest) : (currentValue > previousBest);
+
+    if (beatPrevious) {
+        return `<span class="current-value new-best">${label}: ${currentFormatted}</span><span class="last-best">Last Best: ${previousFormatted}</span>`;
+    } else {
+        const bestToShow = isTime ? (previousBest !== null ? `${previousBest.toFixed(3)}s` : 'None') : previousBest;
+        return `<span class="current-value">${label}: ${currentFormatted}</span><span class="last-best">Last Best: ${bestToShow}</span>`;
+    }
+};
+
+// Updated Game Over Message function
 const showGameOverMessage = () => {
-    const { newHighScore, highScores, difficulty } = gameState;
-    const highScoreHTML = newHighScore ? 
-        `<p class="high-score-text">
-            New High Score: <span class="high-score-value">${highScores[difficulty]} 🏆</span>
-        </p>` : '';
-        
+    const { score, difficulty, correctClicks, totalReactionTime, highScores, bestAverageTimes, previousBestScore, previousBestTime } = gameState;
+    const MIN_CLICKS_FOR_AVG = 3; // Minimum correct clicks to show average time
+
+    let averageTime = null;
+    let timeLine = ''; // Initialize timeLine outside the conditional
+    let didBeatScore = score > previousBestScore;
+    let didBeatTime = false;
+
+    // Calculate average time only if threshold is met
+    if (correctClicks >= MIN_CLICKS_FOR_AVG) {
+        averageTime = totalReactionTime / correctClicks / 1000; // in seconds
+        didBeatTime = previousBestTime === null || averageTime < previousBestTime;
+
+        // Update best time if beaten
+        if (didBeatTime) {
+            bestAverageTimes[difficulty] = averageTime;
+            store.set(`besttime-${difficulty}`, averageTime.toFixed(3));
+        }
+        // Generate time result string only if calculated
+        timeLine = formatResultLine("Avg. Time", averageTime, previousBestTime, true);
+    }
+
+    // Update high score if beaten
+    if (didBeatScore) {
+        highScores[difficulty] = score;
+        store.set(`highscore-${difficulty}`, score);
+    }
+
+    // Generate score result string
+    const scoreLine = formatResultLine("Score", score, previousBestScore);
+
+    // Get dynamic title (can still be influenced by beating time even if not displayed)
+    const title = getGameOverTitle(didBeatScore, didBeatTime);
+
+    // Construct HTML
     $('message-content').innerHTML = `
         <button class="close-button" onclick="closeMessage(true)" aria-label="Close">×</button>
         <div>
-            <h2 class="game-over-title">${newHighScore ? '🎉 New High Score!' : '🤦 Game Over'}</h2>
-            ${highScoreHTML}
+            <h2 class="game-over-title">${title}</h2>
+            ${scoreLine}
+            ${timeLine} <!-- This will be empty if threshold not met -->
             <p class="correct-tile-hint">(Close to see correct tile)</p>
             <button class="play-again-button" onclick="startGame('${difficulty}')">Play Again</button>
         </div>`;
 
     $('message-overlay').classList.add('active');
-    
-    if (!newHighScore) return;
-    
-    // Fire confetti when showing game over dialog with new high score
-    setTimeout(() => {
-        const confettiConfig = {
-            particleCount: 200,
-            spread: 90,
-            origin: { y: 0.5, x: 0.5 },
-            colors: ['#FFD700', '#FFA500', '#FF4500', '#008000', '#4169E1', '#9C27B0'],
-            disableForReducedMotion: true
-        };
-        
-        confetti(confettiConfig);
-        
-        // Additional bursts with slight delays
-        [
-            { delay: 200, config: { particleCount: 100, angle: 60, spread: 60, origin: { x: 0, y: 0.5 }}},
-            { delay: 400, config: { particleCount: 100, angle: 120, spread: 60, origin: { x: 1, y: 0.5 }}},
-            { delay: 600, config: { particleCount: 150, startVelocity: 30, spread: 70, origin: { x: 0.5, y: 0.5 }, gravity: 1}}
-        ].forEach(({ delay, config }) => setTimeout(() => confetti(config), delay));
-    }, 300);
+
+    // Trigger confetti if any record was beaten (regardless of threshold for display)
+    if (didBeatScore || didBeatTime) {
+        setTimeout(() => {
+            const confettiConfig = { // Assume existing confettiConfig is defined elsewhere or paste it here
+                particleCount: 200,
+                spread: 90,
+                origin: { y: 0.5, x: 0.5 },
+                colors: ['#FFD700', '#FFA500', '#FF4500', '#008000', '#4169E1', '#9C27B0'],
+                disableForReducedMotion: true
+            };
+            confetti(confettiConfig);
+            // Additional bursts...
+            [
+                { delay: 200, config: { particleCount: 100, angle: 60, spread: 60, origin: { x: 0, y: 0.5 }}},
+                { delay: 400, config: { particleCount: 100, angle: 120, spread: 60, origin: { x: 1, y: 0.5 }}},
+                { delay: 600, config: { particleCount: 150, startVelocity: 30, spread: 70, origin: { x: 0.5, y: 0.5 }, gravity: 1}}
+            ].forEach(({ delay, config }) => setTimeout(() => confetti(config), delay));
+        }, 300);
+    }
 };
 
 const handleGuess = (tile, isCorrect) => {
     if (isCorrect) {
+        // Calculate reaction time for this level
+        const reactionTime = Date.now() - gameState.levelStartTime;
+        gameState.totalReactionTime += reactionTime;
+        gameState.correctClicks++;
+
         tile.classList.add('correct');
         gameState.score++;
         
@@ -170,7 +268,6 @@ const handleGuess = (tile, isCorrect) => {
         if (score > highScores[difficulty]) {
             highScores[difficulty] = score;
             store.set(`highscore-${difficulty}`, score);
-            gameState.newHighScore = true;
         }
         
         resetTimer();
@@ -243,16 +340,41 @@ const resetTimer = () => {
     setTimeout(startTimer, 50);
 };
 
-const endGame = () => {
-    clearTimers();
-    
-    gameState.isPlaying = false;
-    gameState.processingClick = false;
-    showGameOverMessage();
-    gameState.newHighScore = false;
+// Function to show/hide empty state
+const showEmptyState = (show = true, message = "Select a difficulty from below to begin!") => {
+    const emptyState = $('empty-state');
+    if (!emptyState) return; // Element might not exist yet on initial load sometimes
+
+    if (show) {
+        emptyState.innerHTML = `<p>${message}</p>`;
+        emptyState.style.display = 'flex'; // Ensure it's displayed
+        // Timeout to allow display change before opacity transition
+        setTimeout(() => emptyState.classList.add('visible'), 10); 
+    } else {
+        emptyState.classList.remove('visible');
+        // Hide after transition
+        setTimeout(() => emptyState.style.display = 'none', 300); // Match CSS transition
+    }
 };
 
+const endGame = () => {
+    clearTimers();
+    gameState.isPlaying = false;
+    gameState.processingClick = false;
+    // Show empty state again before game over message
+    showEmptyState(true, "Game Over! Select difficulty to play again."); 
+    showGameOverMessage(); 
+};
+
+// Modify startGame
 const startGame = difficulty => {
+    showEmptyState(false); 
+    showPostGameHint(false); // Hide hint on game start
+
+    // Load current bests first before resetting gameState
+    const currentHighScore = gameState.highScores[difficulty] || 0;
+    const currentBestTime = gameState.bestAverageTimes[difficulty] || null;
+
     // Reset game state
     Object.assign(gameState, {
         difficulty,
@@ -261,7 +383,11 @@ const startGame = difficulty => {
         isPlaying: true,
         needsUpdate: true,
         processingClick: false,
-        newHighScore: false
+        levelStartTime: 0,       
+        totalReactionTime: 0,
+        correctClicks: 0,
+        previousBestScore: currentHighScore,
+        previousBestTime: currentBestTime
     });
     gameState.clickedTiles.clear();
     
@@ -270,7 +396,7 @@ const startGame = difficulty => {
     progressBar.style.width = '100%';
     progressBar.classList.remove('low');
     $('time-display').textContent = `${gameState.timeLeft}s`;
-    $('time-display').style.color = 'var(--primary)';
+    $('time-display').style.color = 'var(--color-primary)';
     $('message-overlay').classList.remove('active');
     
     // Start new game
@@ -310,30 +436,6 @@ const adjustGridSize = () => {
     
     // Set tile size CSS variable based on grid size
     document.documentElement.style.setProperty('--tile-size', `var(--tile-size-${gridSize})`);
-    
-    // Set appropriate gap size based on grid size and device
-    const isMobile = window.innerWidth <= 768;
-    
-    // On mobile, use a responsive approach based on viewport width for very small screens
-    if (isMobile && window.innerWidth < 380) {
-        // For very small screens, calculate sizes dynamically
-        const containerWidth = gameGrid.parentElement.offsetWidth;
-        const paddedWidth = containerWidth - 24; // Account for some padding
-        const tileSize = Math.floor(paddedWidth / gridSize);
-        const gap = Math.max(8, Math.floor(paddedWidth * 0.03)); // 3% of width for gap
-        
-        document.documentElement.style.setProperty('--tile-size', `${tileSize}px`);
-        gameGrid.style.gap = `${gap}px`;
-    } else {
-        // For normal devices, use the predefined gaps
-        let gapVar;
-        if (isMobile) {
-            gapVar = gridSize >= 4 ? 'var(--grid-gap-small)' : 'var(--grid-gap-medium)';
-        } else {
-            gapVar = gridSize >= 4 ? 'var(--grid-gap-medium)' : 'var(--grid-gap-large)';
-        }
-        gameGrid.style.gap = gapVar;
-    }
 };
 
 const newLevel = () => {
@@ -353,6 +455,9 @@ const newLevel = () => {
     // Update layout
     adjustGridSize();
     gameState.needsUpdate = true;
+
+    // Record level start time for reaction calculation
+    gameState.levelStartTime = Date.now(); 
 };
 
 const setTheme = theme => {
@@ -384,12 +489,19 @@ const closeSettings = () => {
 
 const initEventListeners = () => {
     // Helper function for registering events
-    const on = (selector, event, handler, options) => 
-        (typeof selector === 'string' ? $(selector) : selector)
-            .addEventListener(event, handler, options);
+    const on = (selector, event, handler, options) => {
+        const element = typeof selector === 'string' ? $(selector) : selector;
+        // Check if the element was found before adding listener
+        if (element) { 
+            element.addEventListener(event, handler, options);
+        } else {
+            // Optionally log a warning if an element isn't found
+            console.warn(`Element not found for selector: ${selector}`); 
+        }
+    };
             
     // Button listeners for difficulty levels
-    ['easy', 'medium', 'hard', 'skull']
+    ['easy', 'medium', 'hard', 'death']
         .forEach(diff => on(`${diff}-btn`, 'click', () => startGame(diff)));
         
     // Settings panel
@@ -425,7 +537,7 @@ const initEventListeners = () => {
 
     // Keyboard shortcuts
     const keyMap = {
-        e: 'easy', m: 'medium', h: 'hard', s: 'skull',
+        e: 'easy', m: 'medium', h: 'hard', d: 'death',
         r: () => startGame(gameState.difficulty),
         t: () => setTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark')
     };
@@ -459,6 +571,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (saved) gameState.highScores[diff] = parseInt(saved);
     });
 
+    // Initialize best average times from localStorage
+    Object.keys(gameState.bestAverageTimes).forEach(diff => {
+        const savedTime = store.get(`besttime-${diff}`);
+        if (savedTime) gameState.bestAverageTimes[diff] = parseFloat(savedTime);
+    });
+
     // Initialize theme 
     setTheme(store.get('theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
     
@@ -474,6 +592,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ensure grid is properly sized
     adjustGridSize();
+    
+    // Show empty state on load
+    showEmptyState(true);
     
     // Run adjustGridSize again after all images and fonts are loaded
     window.addEventListener('load', () => {
@@ -495,8 +616,8 @@ document.addEventListener('DOMContentLoaded', () => {
         store.session.set('welcomed', 'true');
         showMessage(`
 <div class="welcome-section">
-        <h2>Welcome to Shade Master!</h2>
-        <p>Find the tile with a different shade. The game gets harder as you progress!</p>
+        <h2>Welcome to Odd Color Out!</h2>
+        <p>Find the tile with a different color. The game gets harder as you progress!</p>
 </div>
     <div class="info-section">
         <span>Difficulty Levels</span>
@@ -504,10 +625,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <span><b>Easy:</b> 2×2 — 8s</span>
         <span><b>Medium:</b> 3×3 — 6s</span>
         <span><b>Hard:</b> 4×4 — 4s</span>
-        <span><b>Skull:</b> 5×5 — 3s</span>
+        <span><b>💀:</b> 5×5 — 3s</span>
     </div>
 </div>
-    <button class="start-button" onclick="startGame('easy')">Start Game</button>
+    <button class="start-button okay-button" onclick="closeMessage()">Okay!</button> 
 `, 0);
     }
 });

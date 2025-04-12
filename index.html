@@ -41,14 +41,20 @@
         </section>
 
         <div class="game-grid-container">
-        <section id="game-grid" class="grid-size-2"></section>
+        <section id="game-grid" class="grid-size-2">
+            <!-- Add placeholder for empty state message -->
+            <div id="empty-state" style="display: none;"></div> 
+        </section>
         </div>
+
+        <!-- Add placeholder for post-game hint -->
+        <div id="post-game-hint" class="post-game-hint" style="display: none;"></div> 
 
         <section class="controls">
             <button id="easy-btn" aria-label="Start easy game"><span>Easy</span></button>
             <button id="medium-btn" aria-label="Start medium game"><span>Medium</span></button>
             <button id="hard-btn" aria-label="Start hard game"><span>Hard</span></button>
-            <button id="skull-btn" aria-label="Start skull game"><span>💀</span></button>
+            <button id="death-btn" aria-label="Start death game"><span>💀</span></button>
         </section>
     </main>
     <div class="utilities">
