@@ -617,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showMessage(`
 <div class="welcome-section">
         <h2>Welcome to Odd Color Out!</h2>
-        <p>Find the tile with a different color. The game gets harder as you progress!</p>
+        <p>A simple game to find the tile with the odd color out!</p>
 </div>
     <div class="info-section">
         <span>Difficulty Levels</span>
